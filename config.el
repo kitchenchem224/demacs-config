@@ -21,11 +21,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-;;(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 14)
-;;doom-variable-pitch-font (font-spec :family "ETBembo" :size 14)
-;;      doom-variable-pitch-font (font-spec :family "Alegreya" :size 14))
-
-;;
+;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -45,68 +42,8 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
-;; Allow mixed fonts in a buffer.
-(add-hook! 'org-mode-hook #'mixed-pitch-mode)
-(add-hook! 'org-mode-hook #'solaire-mode)
-(setq mixed-pitch-variable-pitch-cursor nil)
-(after! org (setq org-hide-emphasis-markers t))
-(after! org (setq org-insert-heading-respect-content nil))
-
-;; Enable logging of done tasks, and log into LOGBOOK drawer by default.
-(after! org
-  (setq org-log-done t)
-  (setq org-log-into-drawer t))
-
-;; Enable speed keys to use single-key commands when the cursor is placed on a heading, not also at the beginning of a headline
-;; line. This makes them active on any asterisk at the beginning of the line.
-;;(after! org
-;; (setq org-use-speed-commands
-;;        (lambda ()
-;;          (and (looking-at org-outline-regexp)
-;;               (looking-back "^\**")))))
-
-;; Disable electric-mode to avoid weird indentations.
-(add-hook! org-mode (electric-indent-local-mode -1))
-
-
-;; ENable visual line and variable line mode in Org by default.
-(add-hook! org-mode :append
-           #'visual-line-mode
-           #'variable-pitch-mode)
-
-;; Where all the org-captured sutff is found
-(after! org
-  (setq org-agenda-files
-        '("~/gtd" "~/Work/work.org.gpg" "~/org/")))
-
-;; Let attachments get stored with their corresponding org doc.
-(setq org-attach-id-dir "attachments/")
-
-;; Org-roam. Not sure how to get this to work great.
-;; (setq org-roam-directory "~/Pcloud/org-roam/")
-;; (setq +org-roam-open-buffer-on-find-file t)
-
-;; Use org-archive so I actually feel like I am getting stuff done.
-(use-package! org-archive
-  :after org
-  :config
-  (setq org-archive-location "archive.org::datetree/"))
-
-;; If I really want to be neurotic and time myself use this.
-;;(after! org-clock
-;; (setq org-clock-persist t)
-;;  (org-clock-persistence-insinuate))
-
-;; Auto-save and backup files.
-;; (setq auto-save-default t
-;;       make-backup-files t)
-
-;; Disable exit prompt.
-(setq confirm-kill-emacs nil)
-
 ;;Use Doom theme for Treemacs
 (setq doom-themes-treemacs-theme "doom-colors")
-
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
 ;;
@@ -201,29 +138,3 @@
 ;; Vertico integration with LSP
 (use-package! consult-lsp
   :commands (consult-lsp-symbols consult-lsp-diagnostics))
-
-;; Disable ligatures I don't want/like or don't work.
-(plist-put! +ligatures-extra-symbols
-            :and           nil
-            :or            nil
-            :for           nil
-            :not           nil
-            :true          nil
-            :false         nil
-            :int           nil
-            :float         nil
-            :str           nil
-            :bool          nil
-            :list          nil
-            )
-
-(let ((ligatures-to-disable '(:true :false :int :float :str :bool :list :and :or :for :not)))
-  (dolist (sym ligatures-to-disable)
-    (plist-put! +ligatures-extra-symbols sym nil)))
-
-;; Show word count in modeline for modes from doom-modeline-continuos-word-count-modes (org & Markdown etc.)
-(setq doom-modeline-enable-word-count t)
-
-;; Better undo/redo?
-;; (after! undo-fu
-;;  (map! :map undo-fu-mode-map "C-?" #'undo-fu-only-redo))
