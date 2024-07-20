@@ -79,6 +79,21 @@
 ;;
 ;;; ~/.doom.d/config.el
 
+;; Load tree-sitter
+(use-package! tree-sitter
+  :config
+  (require 'tree-sitter-langs)
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package! highlight-numbers
+  :hook (prog-mode . highlight-numbers-mode))
+
+(use-package! rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package! highlight-quoted
+  :hook (emacs-lisp-mode . highlight-quoted-mode))
 ;; Load lsp-mode
 (use-package! lsp-mode
   :commands (lsp lsp-deferred)
@@ -96,7 +111,7 @@
   ;; Configure LSP clients
   (setq lsp-clients-go-server "gopls"
         lsp-clojure-server 'clojure-lsp
-        lsp-pylsp-server-command "pylsp"
+        lsp-pylsp-server-command '(".env/bin/pylsp")
         lsp-clients-clangd-executable "clangd")
 
   ;; Custom LSP settings can be added here
@@ -115,7 +130,13 @@
 
 ;; Python mode configuration
 (after! python
-  (setq python-shell-interpreter "python3"))
+  (setq python-shell-interpreter "python3")
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (when (locate-dominating-file default-directory ".env")
+                (pyvenv-activate (expand-file-name ".env" (project-root (project-current))))
+                (lsp-deferred)))))
+
 
 ;; C/C++ mode configuration
 (after! (c-mode c++-mode)
@@ -138,3 +159,25 @@
 ;; Vertico integration with LSP
 (use-package! consult-lsp
   :commands (consult-lsp-symbols consult-lsp-diagnostics))
+
+;; ;; Disable prettify-symbols-mode
+;; (remove-hook! (prog-mode org-mode) #'prettify-symbols-mode)
+
+;; ;; Disable fancy symbols
+;; (setq doom-unicode-font nil)
+
+
+;; ;; Disable ligatures
+;; (setq +ligatures-in-modes nil)
+
+;; ;; Disable specific visual enhancements
+;; (after! prog-mode
+;;   (setq-default show-trailing-whitespace nil)
+;;   (setq-default indicate-empty-lines nil))
+
+;; ;; Disable visual line fringe indicators
+;; (setq visual-line-fringe-indicators '(nil nil))
+
+;; ;; Disable prettify symbols for Python specifically
+;; (after! python
+;;   (setq python-prettify-symbols-alist nil))
