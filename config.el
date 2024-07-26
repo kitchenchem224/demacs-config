@@ -3,7 +3,6 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 (setq user-full-name "Nick Janapol"
@@ -44,40 +43,6 @@
 
 ;;Use Doom theme for Treemacs
 (setq doom-themes-treemacs-theme "doom-colors")
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
-;;
-;;   (after! PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
-;; Here are some additional functions/macros that will help you configure Doom.
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
-;;
-;;
-;;; ~/.doom.d/config.el
 
 ;; Load tree-sitter
 (use-package! tree-sitter
@@ -94,6 +59,7 @@
 
 (use-package! highlight-quoted
   :hook (emacs-lisp-mode . highlight-quoted-mode))
+
 ;; Load lsp-mode
 (use-package! lsp-mode
   :commands (lsp lsp-deferred)
@@ -109,20 +75,22 @@
   (setq lsp-keymap-prefix "C-c l")
   :config
   ;; Configure LSP clients
-  (setq lsp-clients-go-server "gopls"
+  (setq lsp-clients-go-server "/nick/go/bin/gopls"
         lsp-clojure-server 'clojure-lsp
         lsp-pylsp-server-command '(".env/bin/pylsp")
-        lsp-clients-clangd-executable "clangd")
-
-  ;; Custom LSP settings can be added here
-  (setq lsp-enable-snippet nil ;; Disable snippets, if you don't use them
-        lsp-enable-indentation nil ;; Disable indentation for languages where you don't want it
-        ))
+        lsp-clients-clangd-executable "clangd"
+        lsp-enable-snippet nil
+        lsp-enable-indentation nil))
 
 ;; Go mode configuration
 (after! go-mode
   (setq gofmt-command "goimports")
-  (add-hook 'before-save-hook 'gofmt-before-save))
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  ;; Debugging LSP connection
+  (add-hook 'go-mode-hook
+            (lambda ()
+              (message "Starting LSP for Go mode")
+              (lsp-deferred))))
 
 ;; Clojure mode configuration
 (after! clojure-mode
@@ -137,7 +105,6 @@
                 (pyvenv-activate (expand-file-name ".env" (project-root (project-current))))
                 (lsp-deferred)))))
 
-
 ;; C/C++ mode configuration
 (after! (c-mode c++-mode)
   (setq c-basic-offset 4))
@@ -146,7 +113,7 @@
 (use-package! lsp-ui
   :commands lsp-ui-mode
   :config
-  (setq lsp-ui-sideline-enable nil ;; Disable sideline help, if you don't want it
+  (setq lsp-ui-sideline-enable nil
         lsp-ui-doc-enable t
         lsp-ui-doc-show-with-cursor t
         lsp-ui-doc-position 'at-point))
@@ -160,24 +127,11 @@
 (use-package! consult-lsp
   :commands (consult-lsp-symbols consult-lsp-diagnostics))
 
-;; ;; Disable prettify-symbols-mode
-;; (remove-hook! (prog-mode org-mode) #'prettify-symbols-mode)
-
-;; ;; Disable fancy symbols
-;; (setq doom-unicode-font nil)
-
-
-;; ;; Disable ligatures
-;; (setq +ligatures-in-modes nil)
-
-;; ;; Disable specific visual enhancements
-;; (after! prog-mode
-;;   (setq-default show-trailing-whitespace nil)
-;;   (setq-default indicate-empty-lines nil))
-
-;; ;; Disable visual line fringe indicators
-;; (setq visual-line-fringe-indicators '(nil nil))
-
-;; ;; Disable prettify symbols for Python specifically
-;; (after! python
-;;   (setq python-prettify-symbols-alist nil))
+(after! lsp-mode
+  (setq  lsp-go-analyses '((fieldalignment . t)
+                           (nilness . t)
+                           (shadow . t)
+                           (unusedparams . t)
+                           (unusedwrite . t)
+                           (useany . t)
+                           (unusedvariable . t))))
